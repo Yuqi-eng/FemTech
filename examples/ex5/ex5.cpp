@@ -588,7 +588,7 @@ void InitBoundaryCondition(const Json::Value& jsonInput) {
     linAccYv = (double*)malloc(sizeof(double)*linAccYSize);
     linAccZSize = jsonInput["linear-acceleration"]["zt"].size();
     tempSize = jsonInput["linear-acceleration"]["zv"].size();
-    assert(tempSize == linAccYSize);
+    assert(tempSize == linAccZSize);
     linAccZt = (double*)malloc(sizeof(double)*linAccZSize);
     linAccZv = (double*)malloc(sizeof(double)*linAccZSize);
     jsonToArray(linAccXt, jsonInput["linear-acceleration"]["xt"]);
@@ -888,6 +888,21 @@ void InitBoundaryCondition(const Json::Value& jsonInput) {
     yInt[j] = 0.0;
     ydotInt[j] = 0.0;
   }
+  
+  // Allowing non-zero initial angular velocity if provided.
+  if (jsonInput["initial-angular-velocity"].isArray()) {
+    yInt[0] = jsonInput["initial-angular-velocity"][0].asDouble();
+    yInt[1] = jsonInput["initial-angular-velocity"][1].asDouble();
+    yInt[2] = jsonInput["initial-angular-velocity"][2].asDouble();
+    
+    if (world_rank == 0) {
+      std::cout << "Initial angular velocity: "
+                << yInt[0] << ", "
+                << yInt[1] << ", "
+                << yInt[2] << " rad/s" << std::endl;
+    }
+  }
+
   // Set initial displacements, accelerations, velocities to zero
   for (int i = 0; i < boundarySize; i++) {
     int index = boundaryID[i] * ndim;

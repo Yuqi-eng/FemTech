@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <ctime>
 
 #include "mpi.h"
 
