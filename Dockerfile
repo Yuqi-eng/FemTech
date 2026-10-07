@@ -17,11 +17,11 @@ WORKDIR /home/ubuntu
 # Setup FemTech
 COPY --chown=ubuntu:root . /home/ubuntu/FemTech
 RUN mkdir FemTech/build_native
-RUN cd FemTech/build_native;cmake .. -DEXAMPLES=ON -DEXAMPLE5=ON; make -j 8;
+RUN cd FemTech/build_native;cmake .. -DEXAMPLES=ON -DEXAMPLE5=ON -DPODIUM_MOUTHGUARD=ON; make -j 8;
 RUN if [ "$PARCH" != "native" ]; then \
     mkdir FemTech/build_$PARCH && \
     cd FemTech/build_$PARCH && \
-    cmake .. -DPROC_ARCH=$PARCH -DEXAMPLES=ON -DEXAMPLE5=ON && \
+    cmake .. -DPROC_ARCH=$PARCH -DEXAMPLES=ON -DEXAMPLE5=ON -DPODIUM_MOUTHGUARD=ON && \
     make -j 8; \ 
   fi
 
@@ -47,7 +47,8 @@ WORKDIR /home/ubuntu
 # Setup FemTech
 RUN mkdir FemTechRun FemTechRun/results FemTechRun/results/vtu
 
-COPY --from=buildFemTech ["/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/ex5", \
+COPY --from=buildFemTech ["/home/ubuntu/FemTech/build_${PARCH}/examples/podium_mouthguard/podium_mouthguard", \
+  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/ex5", \
   "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/input.json", \
   "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/materials.dat", \
   "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/coarse_brain.inp", \
