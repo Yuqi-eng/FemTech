@@ -140,7 +140,9 @@ renderView4.Update()
 # create a new 'Threshold'
 threshold1 = Threshold(Input=coarse_brain_harry_s0JiuaYffpvd)
 threshold1.Scalars = ['POINTS', 'PartID']
-threshold1.ThresholdRange = [0.0, 9.0]
+threshold1.LowerThreshold = 0.0
+threshold1.UpperThreshold = 9.0
+threshold1.ThresholdMethod = "Between"
 
 # show data in view
 threshold1Display = Show(threshold1, renderView4, 'UnstructuredGridRepresentation')
@@ -182,7 +184,9 @@ threshold1Display.SetScalarBarVisibility(renderView4, True)
 renderView4.Update()
 
 # Properties modified on threshold1
-threshold1.ThresholdRange = [1.0, 9.0]
+threshold1.LowerThreshold = 1.0
+threshold1.UpperThreshold = 9.0
+threshold1.ThresholdMethod = "Between"
 
 # update the view to ensure updated data information
 renderView4.Update()

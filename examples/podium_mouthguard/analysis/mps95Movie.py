@@ -18,7 +18,7 @@ meshFile = simulationJson["mesh"]
 mesh = os.path.splitext(meshFile)[0]
 
 # Read time steps reported in pvd files
-paraviewFile = "fine_brain_12-22-2020_prevent_impact.pvd"
+paraviewFile = mesh+"_"+uid+".pvd"
 
 #### disable automatic camera reset on 'Show'
 paraview.simple._DisableFirstRenderCameraReset()
@@ -152,7 +152,9 @@ threshold1Display.Opacity = 0.1
 # create a new 'Threshold'
 threshold2 = Threshold(Input=threshold1)
 threshold2.Scalars = ['POINTS', 'MPS-95']
-threshold2.ThresholdRange = [1.0, 1.0]
+threshold2.LowerThreshold = 1.0
+threshold2.UpperThreshold = 1.0
+threshold1.ThresholdMethod = "Between"
 threshold2.AllScalars = 0
 
 # show data in view
@@ -173,7 +175,7 @@ partIDLUT.ApplyPreset('Viridis (matplotlib)', True)
 # get color legend/bar for partIDLUT in view renderView1
 partIDLUTColorBar = GetScalarBar(partIDLUT, renderView1)
 
-partIDLUTColorBar.WindowLocation = 'AnyLocation'
+partIDLUTColorBar.WindowLocation = 'Any Location'
 partIDLUTColorBar.Position = [0.9057217165149545, 0.1966626936829559]
 partIDLUTColorBar.ScalarBarLength = 0.3299999999999999
 partIDLUTColorBar.ScalarBarThickness = 16
@@ -190,7 +192,7 @@ annotateTimeFilter1Display = Show(annotateTimeFilter1, renderView1, 'TextSourceR
 annotateTimeFilter1.Format = 'Time: %6.2f (msec)'
 annotateTimeFilter1.Scale = 1000.0
 annotateTimeFilter1Display.FontFamily = 'Times'
-annotateTimeFilter1Display.WindowLocation = 'AnyLocation'
+annotateTimeFilter1Display.WindowLocation = 'Any Location'
 annotateTimeFilter1Display.FontSize = 10
 annotateTimeFilter1Display.Position = [0.01, 0.94]
 
