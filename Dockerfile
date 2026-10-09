@@ -17,11 +17,11 @@ WORKDIR /home/ubuntu
 # Setup FemTech
 COPY --chown=ubuntu:root . /home/ubuntu/FemTech
 RUN mkdir FemTech/build_native
-RUN cd FemTech/build_native;cmake .. -DEXAMPLES=ON -DEXAMPLE5=ON -DPODIUM_MOUTHGUARD=ON; make -j 8;
+RUN cd FemTech/build_native;cmake .. -DEXAMPLES=ON -DPODIUM_MOUTHGUARD=ON; make -j 8;
 RUN if [ "$PARCH" != "native" ]; then \
     mkdir FemTech/build_$PARCH && \
     cd FemTech/build_$PARCH && \
-    cmake .. -DPROC_ARCH=$PARCH -DEXAMPLES=ON -DEXAMPLE5=ON -DPODIUM_MOUTHGUARD=ON && \
+    cmake .. -DPROC_ARCH=$PARCH -DEXAMPLES=ON -DPODIUM_MOUTHGUARD=ON && \
     make -j 8; \ 
   fi
 
@@ -48,13 +48,9 @@ WORKDIR /home/ubuntu
 RUN mkdir FemTechRun FemTechRun/results FemTechRun/results/vtu
 
 COPY --from=buildFemTech ["/home/ubuntu/FemTech/build_${PARCH}/examples/podium_mouthguard/podium_mouthguard", \
-  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/ex5", \
-  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/input.json", \
-  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/materials.dat", \
-  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/coarse_brain.inp", \
-  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/simulationMovie.py", \
-  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/mps95Movie.py", \
-  "/home/ubuntu/FemTech/build_${PARCH}/examples/ex5/addGraph.py", \
+  "/home/ubuntu/FemTech/build_${PARCH}/examples/podium_mouthguard/runtime_files/input.json", \
+  "/home/ubuntu/FemTech/build_${PARCH}/examples/podium_mouthguard/runtime_files/materials.dat", \
+  "/home/ubuntu/FemTech/build_${PARCH}/examples/podium_mouthguard/runtime_files/coarse_brain.inp", \
   "/home/ubuntu/FemTechRun/"]
 
 # To create image : docker build --pull --cache-from nsfcareer/femtech:develop --cache-from nsfcareer/femtech:production --tag nsfcareer/femtech:production -f Dockerfile .

@@ -132,8 +132,6 @@ link_directories(${binary_dir}/src/lib_json)
 ExternalProject_Get_Property(Boost source_dir)
 include_directories(${source_dir})
 
-
-
 #============================================================================
 # BLAS/Lapack
 #==============================================================================
@@ -151,7 +149,6 @@ if(LAPACK_FOUND AND BLAS_FOUND)
    set(lapackblas_libraries ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 endif()
 #=============================================================================
-
 
 ADD_SUBDIRECTORY (src)
 

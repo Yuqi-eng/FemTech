@@ -5,7 +5,7 @@
     "position": "unknown"
   },
   "simulation": {
-    "mesh": "fine_brain_12-22-2020.inp",
+    "mesh": "coarse_brain.inp",
     "linear-acceleration": {
       "xt": [
         0.0,
