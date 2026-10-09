@@ -18,7 +18,7 @@ meshFile = simulationJson["mesh"]
 mesh = os.path.splitext(meshFile)[0]
 
 # Read time steps reported in pvd files
-paraviewFile = mesh+"_"+uid+".pvd"
+paraviewFile = "fine_brain_12-22-2020_prevent_impact.pvd"
 
 #### disable automatic camera reset on 'Show'
 paraview.simple._DisableFirstRenderCameraReset()
@@ -122,7 +122,9 @@ animationScene1.UpdateAnimationUsingDataTimeSteps()
 # create a new 'Threshold'
 threshold1 = Threshold(Input=coarse_brain_test_ptpvd)
 threshold1.Scalars = ['POINTS', 'PartID']
-threshold1.ThresholdRange = [2.0, 9.0]
+threshold1.LowerThreshold = 2.0
+threshold1.UpperThreshold = 9.0
+threshold1.ThresholdMethod = "Between"
 
 # show data in view
 threshold1Display = Show(threshold1, renderView1, 'UnstructuredGridRepresentation')
