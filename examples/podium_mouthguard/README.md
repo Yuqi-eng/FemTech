@@ -8,6 +8,6 @@ prompt> sbatch run_mg.sh
 # To Plot:
 prompt> gnuplot gnuplot.script
 
-## On windows:
--start x, at prompt type: startxwin
--cygstart plot.png
+### Plot mps95 and movement trajectories
+prompt> pvpython mps95Movie.py input.json
+prompt> pvpython simulationMovie.py $PVD_FILE_NAME
