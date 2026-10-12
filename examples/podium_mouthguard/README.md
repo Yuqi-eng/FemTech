@@ -8,6 +8,7 @@ prompt> sbatch run_mg.sh
 # To Plot:
 prompt> gnuplot gnuplot.script
 
-### Plot mps95 and movement trajectories
+### Plot mps95
 prompt> pvpython mps95Movie.py input.json
-prompt> pvpython simulationMovie.py $PVD_FILE_NAME
+### Plot movement trajectories (don't put .pvd in the input argument, just the file name string before .pvd)
+prompt> pvpython simulationMovie.py $PVD_FILE_NAME 
