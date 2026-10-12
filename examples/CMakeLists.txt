@@ -16,8 +16,10 @@ option (EXAMPLE15  "3D course brain model - lsdyna k format based off of simon m
 option (EXAMPLE16  "6-elements per direction hex model - abaqus inp format" OFF)
 option (EXAMPLE17  "Plate Impact problem of Valerie Martin - abaqus inp format" OFF)
 option (EXAMPLE18  "Full Brain model validation" OFF)
+option (EXAMPLE19  "3D Cuboid Shear Test" OFF)
+option (EXAMPLE20  "3D Cuboid Traction BC Test" OFF)
+option (EXAMPLE21  "3D Brain Sim Pressure" OFF)
 option (Benchmarking-Parallel  "Parallel-Benchmarks" OFF)
-option (PODIUM_MOUTHGUARD "Brain impact using podium mouthguard data" OFF)
 
 if (EXAMPLE1)
 	add_subdirectory(ex1)
@@ -93,10 +95,18 @@ if (EXAMPLE18)
 	add_subdirectory(ex18)
 endif (EXAMPLE18)
 
+if (EXAMPLE19)
+	add_subdirectory(ex19)
+endif (EXAMPLE19)
+
+if (EXAMPLE20)
+	add_subdirectory(ex20)
+endif (EXAMPLE20)
+
+if (EXAMPLE21)
+	add_subdirectory(ex21)
+endif (EXAMPLE21)
+
 if (Benchmarking-Parallel)
 	add_subdirectory(Benchmarking-Parallel)
 endif (Benchmarking-Parallel)
-
-if (PODIUM_MOUTHGUARD)
-  add_subdirectory(podium_mouthguard)
-endif()

@@ -27,6 +27,7 @@ void FreeArrays() {
 	free1DArray(boundary);
 	free1DArray(velocities_half);
   free1DArray(fe);
+  free1DArray(fe_prev);
   free1DArray(fi);
 	free1DArray(f_net);
 	free1DArray(fr_prev);
@@ -36,10 +37,12 @@ void FreeArrays() {
 	free1DArray(f_damp_curr);
 	free1DArray(displacements_prev);
   free1DArray(F);
-	free1DArray(pk2);
-	free1DArray(pk2ptr);
+	// free1DArray(pk2);
+	// free1DArray(pk2ptr);
 	free1DArray(materialID);
 	free1DArray(properties);
+	free1DArray(waveSpeed);
+	free1DArray(viscoElasticPart);
 	free1DArray(detF);
 	free1DArray(invF);
 	free1DArray(Eavg);
@@ -65,11 +68,17 @@ void FreeArrays() {
   free1DArray(fintGQ);
   free1DArray(B);
   // Viscoelastic materials
-  free1DArray(Hn_1);
-  free1DArray(Hn_2);
-  free1DArray(S0n);
+  if (Hn) {
+    for (unsigned int i = 0; i < nelements; ++i) {
+      free1DArray(Hn[i]);
+      free1DArray(S0n[i]);
+    }
+    free1DArray(Hn);
+    free1DArray(S0n);
+  }
+  free1DArray(nProny);
 
-  if (ElementType != NULL){
+  if (ElementType != NULL) {
     for (int i = 0; i < nelements; i++){
         free(ElementType[i]);
     }
@@ -79,5 +88,18 @@ void FreeArrays() {
 
   if (world_rank == 0) {
     fclose(energyFile);
+  }
+  // Free arrays used by Updated Lagrangian Formulation
+  free1DArray(F_Xi);
+  free1DArray(F_XiInverse);
+  free1DArray(sigma_n);
+  free1DArray(sigmaptr);
+  free1DArray(B0);
+  // Temperory test variables
+  // free1DArray(F_Xi_0);
+  // Free arrays used for reduced integration
+  if (reducedIntegration) {
+    free1DArray(f_hg);
+    free1DArray(f_hgprev);
   }
 }

@@ -13,13 +13,12 @@
  * material properties of the element. Expected material properties :
  * \rho    = properties(0)
  * \mu     = properties(1)
- * \lambda = properties(2)
+ * K       = properties(2)
  * k_1     = properties(3)
  * k_2     = properties(4)
- * g_1     = properties(5)
- * t_1     = properties(6)
- * g_2     = properties(7)
- * t_2     = properties(8)
+ * n       = properties(5)
+ * g_i     = properties(6+2*i)
+ * t_i     = properties(7+2*i)
  * Implementation follows : Kaliske, M. and Rothert, H., 1997. Formulation and 
  * implementation of three-dimensional viscoelasticity at small and finite 
  * strains. Computational Mechanics, 19(3), pp.228-239. */
@@ -40,23 +39,26 @@ void HGOIsotropicViscoelastic(int e, int gp) {
   const double* localProperties = &(properties[pideIndex]);
   // Read material properties
   const double mu = localProperties[1];
-  const double lambda = localProperties[2];
+  const double K = localProperties[2];
   const double k1 = localProperties[3];
   const double k2 = localProperties[4];
   // Kappa = 1/3 for isotropic fiber distribution
   const double kappa = 1.0/3.0;
-  const double g1 = localProperties[5];
-  const double t1 = localProperties[6];
-  const double g2 = localProperties[7];
-  const double t2 = localProperties[8];
+  const int nPronyLocal = int(localProperties[5]); // No of terms in prony series
+  // TODO(Anil) convert local allocations to one time global
+  double *gi, *ti;
+  gi = (double*)malloc(nPronyLocal*sizeof(double));
+  ti = (double*)malloc(nPronyLocal*sizeof(double));
+  for (unsigned int i = 0; i < nPronyLocal; ++i) {
+    gi[i] = localProperties[6+2*i];
+    ti[i] = localProperties[7+2*i];
+  }
 
-  // Compute the bulk modulus from \lambda and \mu
-  const double K = lambda + 2.0*mu/3.0;
   double * const F_element_gp = &(F[index]);
   // Compute the hydrostatic diagonal contribution to cauchy stress tensor
   const double hydroDiag = 0.5*K*(J*J-1.0)/J; 
   // Compute the left elastic Cauchy-Green tensor B = F*F^T
-  double matSize = ndim * ndim;
+  const unsigned int matSize = ndim * ndim;
   double *Bmat = mat1;
   dgemm_(chn, chy, &ndim, &ndim, &ndim, &one, F_element_gp, &ndim,
         F_element_gp, &ndim, &zero, Bmat, &ndim);
@@ -119,50 +121,53 @@ void HGOIsotropicViscoelastic(int e, int gp) {
     Sdev[i] = S[i]-Sic[i];
   }
   // Access histroy dependence
-  double *Hn_1Local = &(Hn_1[index]);
-  double *Hn_2Local = &(Hn_2[index]);
-  double *S0nLocal = &(S0n[index]);
-  // Compute c1i = exp(-dt/t_i) and C2i = g_i (1-exp(-dt/t_i))/(dt/t_i)
-  const double rt1 = dt/t1;
-  const double rt2 = dt/t2;
-  const double c11 = exp(-rt1);
-  const double c12 = exp(-rt2);
-  const double c21 = g1*(1-c11)/rt1;
-  const double c22 = g2*(1-c12)/rt2;
-  // Update H_j^{n+1} = c1j*H_j^n + c2j*[Dev S_0^{n+1} - S_0^n]
-  // Update S^{n+1} = S_0^{n+1} + \sum_j H_j^{n+1}
-  for (int i = 0; i < matSize; ++i) {
-    Hn_1Local[i] = c11*Hn_1Local[i]+c21*(Sdev[i]-S0nLocal[i]);
-    Hn_2Local[i] = c12*Hn_2Local[i]+c22*(Sdev[i]-S0nLocal[i]);
-    S[i] = S[i] + Hn_1Local[i] + Hn_2Local[i];
+  double *elemS = S0n[e];
+  double *S0nLocal = &(elemS[gp*matSize]);
+  double *elemH = Hn[e];
+  double *HnLocal = &(elemH[gp*matSize*nPronyLocal]);
+  for (unsigned int i = 0; i < nPronyLocal; ++i) {
+    double *HnI = &(HnLocal[i*matSize]);
+    // Compute C1i = exp(-dt/t_i) and C2i = g_i (1-exp(-dt/t_i))/(dt/t_i)
+    const double rt = dt/ti[i];
+    const double c1i = exp(-rt);
+    const double c2i = gi[i]*(1-c1i)/rt;
+    // Update H_j^{n+1} = c1j*H_j^n + c2j*[Dev S_0^{n+1} - S_0^n]
+    // Update S^{n+1} = S_0^{n+1} + \sum_j H_j^{n+1}
+    for (int j = 0; j < matSize; ++j) {
+      HnI[j] = c1i*HnI[j]+c2i*(Sdev[j]-S0nLocal[j]);
+      S[j] = S[j] + HnI[j];
+    }
   }
 
-  // Get location of array to store PK2 values
-  double * pk2Local = &(pk2[pk2ptr[e]+6*gp]);
-	// 6 values saved per gauss point for 3d
-	// in voigt notation, sigma11
-  pk2Local[0] = S[0];
+  // TODO (NEED UPDATE from PK2 to Cauchy)
+  // Get location of array to store Cauchy values
+  double * sigma_nLocal = &(sigma_n[sigmaptr[e]+6*gp]);
+  // 6 values saved per gauss point for 3d
+  // in voigt notation, sigma11
+  sigma_nLocal[0] = S[0];
   // in voigt notation, sigma22
-  pk2Local[1] = S[4];
+  sigma_nLocal[1] = S[4];
   // in voigt notation, sigma33
-  pk2Local[2] = S[8];
+  sigma_nLocal[2] = S[8];
   // in voigt notation, sigma23
-  pk2Local[3] = S[7];
+  sigma_nLocal[3] = S[7];
   // in voigt notation, sigma13
-  pk2Local[4] = S[6];
+  sigma_nLocal[4] = S[6];
   // in voigt notation, sigma12
-  pk2Local[5] = S[3];
+  sigma_nLocal[5] = S[3];
 
   // Update deviatoric part of S_0 for next time step
   for (int i = 0; i < matSize; ++i) {
     S0nLocal[i] = Sdev[i];
   }
+  free(gi);
+  free(ti);
 
 #ifdef DEBUG
   FILE_LOG_SINGLE(DEBUGLOGIGNORE, "Element ID = %d, gp = %d", e, gp);
   for(int i=0;i<6;i++){
-    int indexD = pk2ptr[e]+6*gp+i;
-    FILE_LOG_SINGLE(DEBUGLOGIGNORE, "PK2[%d] = %10.6e", indexD, pk2[indexD]);
+    int indexD = sigmaptr[e]+6*gp+i;
+    FILE_LOG_SINGLE(DEBUGLOGIGNORE, "Sigma[%d] = %10.6e", indexD, sigma_n[indexD]);
   }
 #endif //DEBUG
 }
