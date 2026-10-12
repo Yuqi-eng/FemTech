@@ -55,6 +55,6 @@ COPY --from=buildFemTech ["/home/ubuntu/FemTech/build_${PARCH}/examples/podium_m
   "/home/ubuntu/FemTech/build_${PARCH}/examples/podium_mouthguard/runtime_files/coarse_brain.inp", \
   "/home/ubuntu/FemTechRun/"]
 
-COPY --from=buildFemTech "/home/ubuntu/FemTech/build_${PARCH}/examples/ex21/materials.dat" "/home/ubuntu/FemTechRun/materialsPressure.dat"
+## COPY --from=buildFemTech "/home/ubuntu/FemTech/build_${PARCH}/examples/ex21/materials.dat" "/home/ubuntu/FemTechRun/materialsPressure.dat"
 
 # To create image : docker build --pull --cache-from nsfcareer/femtech:develop --cache-from nsfcareer/femtech:production --tag nsfcareer/femtech:production -f Dockerfile .
