@@ -154,7 +154,7 @@ threshold2 = Threshold(Input=threshold1)
 threshold2.Scalars = ['POINTS', 'MPS-95']
 threshold2.LowerThreshold = 1.0
 threshold2.UpperThreshold = 1.0
-threshold1.ThresholdMethod = "Between"
+threshold2.ThresholdMethod = "Between"
 threshold2.AllScalars = 0
 
 # show data in view
