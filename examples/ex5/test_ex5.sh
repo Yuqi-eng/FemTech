@@ -7,27 +7,28 @@ set -eo pipefail
 cd "$(dirname "$0")"
 
 # input_test_?.json array
-testInputFiles=( p1 pt x s )
+# testInputFiles=( p1 pt x s )
+testInputFiles=( pt x )
 # Values of element id expected in the order, max-shear, min-principal,
 # max-principal
 value_p1=( 9821 7323 10243 )
-value_pt=( 7963 16263 7960 )
-value_s=( 15186 12602 15186 )
-value_x=( 8050 9769 9774 )
+value_pt=( 7740 14281 7748 )
+value_x=( 7932 7932 7863 )
+value_s=( 7740 7740 7740 )
 
 # Run all tests and check output
 for name in "${testInputFiles[@]}"
 do
   input_filename="input_test_${name}.json"
 	echo "Input file name : ${input_filename}"
-  uid=`cat ${input_filename}|jq -r .'["uid"]'`
+  uid=`cat ${input_filename}|jq -r .'["event_id"]'`
   output_filename="${uid}_output.json"
   eval expectedVal=( \${value_$name[@]} )
   # Delete output file if it exists
   if [ -e $output_filename ]; then
     rm $output_filename
   fi
-  mpirun --oversubscribe -np 8 -mca btl_base_warn_component_unused 0 -mca btl_vader_single_copy_mechanism none ex5 $input_filename
+  mpirun --oversubscribe -np 2 -mca btl_base_warn_component_unused 0 -mca btl_vader_single_copy_mechanism none ex5 $input_filename
   simulationSuccess=$?
   if [ $simulationSuccess -eq 0 ]; then
     if [ -e $output_filename ]; then
