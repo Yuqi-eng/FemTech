@@ -1,4 +1,4 @@
-# generated using paraview version 5.8.0-636-gfeb3424073
+# generated using paraview version 5.13.3
 #
 # To ensure correct image size when batch processing, please search 
 # for and uncomment the line `# renderView*.ViewSize = [*,*]`
@@ -243,9 +243,6 @@ annotateTimeFilter1Display = Show(annotateTimeFilter1, renderView4, 'TextSourceR
 
 # update the view to ensure updated data information
 renderView4.Update()
-
-# Properties modified on annotateTimeFilter1
-annotateTimeFilter1.Format = 'Time: %6.2f (msec)'
 
 # update the view to ensure updated data information
 renderView4.Update()

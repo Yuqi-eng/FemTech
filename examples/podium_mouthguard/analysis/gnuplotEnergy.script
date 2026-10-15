@@ -1,3 +1,7 @@
+## Compares internal and external work, and kinetic energy for FemTech and abaqus simulations
+## Assumes energy.dat and abaqus/energy.rpt in the working directory
+## Run with gnuplot gnuplotEnergy.script
+
 set termoption dashed
 
 unset colorbox

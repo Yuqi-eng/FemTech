@@ -1,4 +1,4 @@
-# trace generated using paraview version 5.8.0
+# trace generated using paraview version 5.13.3
 #
 # To ensure correct image size when batch processing, please search 
 # for and uncomment the line `# renderView*.ViewSize = [*,*]`
@@ -9,6 +9,7 @@ import sys
 import json
 import os
 import numpy as np
+import glob
 
 jsonFile = sys.argv[1]
 inputJson = json.loads(open(jsonFile).read())
@@ -18,7 +19,8 @@ meshFile = simulationJson["mesh"]
 mesh = os.path.splitext(meshFile)[0]
 
 # Read time steps reported in pvd files
-paraviewFile = mesh+"_"+uid+".pvd"
+paraviewFile = glob.glob("*.pvd")[0]
+print(f"Loading ParaView file: {paraviewFile}")
 
 #### disable automatic camera reset on 'Show'
 paraview.simple._DisableFirstRenderCameraReset()
@@ -121,26 +123,17 @@ animationScene1.UpdateAnimationUsingDataTimeSteps()
 
 # create a new 'Threshold'
 threshold1 = Threshold(Input=coarse_brain_test_ptpvd)
-threshold1.Scalars = ['POINTS', 'PartID']
+threshold1.Scalars = ['CELLS', 'PartID']
 threshold1.LowerThreshold = 2.0
 threshold1.UpperThreshold = 9.0
 threshold1.ThresholdMethod = "Between"
 
 # show data in view
 threshold1Display = Show(threshold1, renderView1, 'UnstructuredGridRepresentation')
-
 Hide(coarse_brain_test_ptpvd, renderView1)
 
-# show color bar/color legend
-threshold1Display.SetScalarBarVisibility(renderView1, True)
-# hide color bar/color legend
-threshold1Display.SetScalarBarVisibility(renderView1, False)
-
-# turn off scalar coloring
-ColorBy(threshold1Display, None)
-
-# Hide the scalar bar for this color map if no visible data is colored by it.
-HideScalarBarIfNotNeeded(partIDLUT, renderView1)
+# Background brain: solid colour, no scalar colouring
+threshold1Display.ColorArrayName = ['FIELD', '']
 
 # change solid color
 threshold1Display.AmbientColor = [0.0, 0.6666666666666666, 1.0]
@@ -151,7 +144,7 @@ threshold1Display.Opacity = 0.1
 
 # create a new 'Threshold'
 threshold2 = Threshold(Input=threshold1)
-threshold2.Scalars = ['POINTS', 'MPS-95']
+threshold2.Scalars = ['CELLS', 'MPS-95']
 threshold2.LowerThreshold = 1.0
 threshold2.UpperThreshold = 1.0
 threshold2.ThresholdMethod = "Between"
@@ -159,42 +152,62 @@ threshold2.AllScalars = 0
 
 # show data in view
 threshold2Display = Show(threshold2, renderView1, 'UnstructuredGridRepresentation')
-
-# trace defaults for the display properties.
 threshold2Display.Representation = 'Surface'
-threshold2Display.ColorArrayName = ['CELLS', 'PartID']
-# set scalar coloring
-ColorBy(threshold2Display, ('CELLS', 'PartID'))
 
-# show color bar/color legend
+# Colour MPS95 elements by anatomical region
+ColorBy(threshold2Display, ('CELLS', 'PartID'))
+partIDLUT = GetColorTransferFunction('PartID')
+partIDLUT.InterpretValuesAsCategories = 1
+
+# PartID -> anatomical region
+partIDLUT.Annotations = [
+    '2', 'Basal Ganglia',
+    '3', 'Hippocampus',
+    '4', 'Thalamus',
+    '5', 'Corpus Callosum',
+    '6', 'Ventricles',
+    '7', 'Brain stem',
+    '8', 'Cerebellum',
+    '9', 'Brain cerebral hemispheres'
+]
+
+# Blue -> cyan -> green -> yellow -> red
+partIDLUT.IndexedColors = [
+    0.000, 0.000, 1.000,  # 2 - Blue
+    0.000, 0.400, 1.000,  # 3
+    0.000, 0.800, 1.000,  # 4
+    0.000, 0.800, 0.500,  # 5
+    0.400, 0.900, 0.000,  # 6
+    1.000, 0.900, 0.000,  # 7
+    1.000, 0.450, 0.000,  # 8
+    1.000, 0.000, 0.000   # 9 - Red
+]
+
+threshold2Display.LookupTable = partIDLUT
 threshold2Display.SetScalarBarVisibility(renderView1, True)
 
-# Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
-partIDLUT.ApplyPreset('Viridis (matplotlib)', True)
-
-# get color legend/bar for partIDLUT in view renderView1
+# Legend title
 partIDLUTColorBar = GetScalarBar(partIDLUT, renderView1)
-
+partIDLUTColorBar.Title = 'Anatomical region'
+partIDLUTColorBar.ComponentTitle = ''
 partIDLUTColorBar.WindowLocation = 'Any Location'
-partIDLUTColorBar.Position = [0.9057217165149545, 0.1966626936829559]
-partIDLUTColorBar.ScalarBarLength = 0.3299999999999999
+partIDLUTColorBar.Position = [0.9, 0.20]
+partIDLUTColorBar.ScalarBarLength = 0.55
 partIDLUTColorBar.ScalarBarThickness = 16
 partIDLUTColorBar.TitleFontFamily = 'Times'
 partIDLUTColorBar.TitleFontSize = 14
 partIDLUTColorBar.LabelFontFamily = 'Times'
 partIDLUTColorBar.LabelFontSize = 14
 partIDLUTColorBar.AutomaticLabelFormat = 1
-partIDLUTColorBar.AddRangeLabels = 0
 
 annotateTime1 = AnnotateTime()
 annotateTimeFilter1 = AnnotateTimeFilter(Input=annotateTime1)
 annotateTimeFilter1Display = Show(annotateTimeFilter1, renderView1, 'TextSourceRepresentation')
-annotateTimeFilter1.Format = 'Time: %6.2f (msec)'
 annotateTimeFilter1.Scale = 1000.0
 annotateTimeFilter1Display.FontFamily = 'Times'
 annotateTimeFilter1Display.WindowLocation = 'Any Location'
 annotateTimeFilter1Display.FontSize = 10
-annotateTimeFilter1Display.Position = [0.01, 0.94]
+annotateTimeFilter1Display.Position = [0.01, 0.98]
 
 # current camera placement for renderView1
 renderView1.CameraPosition = transformedCameraPosition

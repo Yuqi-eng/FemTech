@@ -1,3 +1,5 @@
+## Compares nodal displacements for FemTech with abaqus simulations
+## Run with gnuplot gnuplot.script with plot.dat and abaqus/abaqus.rpt in the working directory
 set termoption dashed
 
 unset colorbox

@@ -1,9 +1,12 @@
+## Reads exisiting simulation png images and adds a graph showing prescribed head kinematics up to the time of each frame
+## Run with python3 input.json 
 import matplotlib.pyplot as plt
 import numpy as np
 import xml.etree.ElementTree as ET
 import sys
 import os
 import json
+import glob
 
 nRes = 100
 
@@ -15,17 +18,21 @@ meshFile = simulationJson["mesh"]
 mesh = os.path.splitext(meshFile)[0]
 
 # Read time steps reported in pvd files
-tree = ET.parse(mesh+"_"+uid+".pvd")
+pvdFile = glob.glob("*.pvd")[0]
+print(f"Loading ParaView file: {pvdFile}")
+
+tree = ET.parse(pvdFile)
 root = tree.getroot()
+
 count = 0
 key1 = 'timestep'
-for elem in tree.iter():
+for elem in root.iter():
     if (elem.tag=="DataSet"):
         count = count + 1
 tArrayRaw = np.zeros(count)
 count1 = 0
 
-for elem in tree.iter():
+for elem in root.iter():
     if (elem.tag=="DataSet"):
         tArrayRaw[count1] = float(elem.attrib[key1])
         count1 = count1 + 1
@@ -80,12 +87,12 @@ else: # Linear acceleration assumed to be a list
     linArray = np.interp(tArray, linT, linV)
     angArray = np.interp(tArray, angT, angV)
 
-tMax = (int(tArray[-1]/10)+1)*10
+tMax = tArray[-1]
 linMax = (int(np.max(linArray)/10)+2)*10
 angMax = (int(np.max(angArray)/100)+2)*100
 
 for fileCount in range(count1):
-    img = plt.imread("simulation_"+mesh+"_"+uid+".%04d.png"%fileCount)
+    img = plt.imread("injury_"+uid+".%04d.png"%fileCount)
 
     figure = plt.figure(figsize=(11,8))
     plt.imshow(img)
@@ -94,7 +101,7 @@ for fileCount in range(count1):
     color2 = plt.cm.viridis(0.50)
 
     tt = tArray[:fileCount*nRes+1]
-    axes2 = figure.add_axes([0.58, 0.25, 0.25, 0.22]) # inset axes
+    axes2 = figure.add_axes([0.18, 0.58, 0.2, 0.18]) # inset axes
 
     p1 = axes2.twinx()
 
@@ -106,16 +113,16 @@ for fileCount in range(count1):
     l2, = p1.plot(tt, angArray[:fileCount*nRes+1], color=color2, linestyle='--', label="Angular")
 
     axes2.set_facecolor((.80, .80, .80))
-    label = axes2.set_xlabel("time [msec]", color="white")
+    label = axes2.set_xlabel("time [ms]", color="white")
     label = axes2.set_ylabel("acceleration [g]", color=color1)
     label = p1.set_ylabel(r"[$rad/s^2$]", color=color2)
     axes2.tick_params(labelcolor='white')
     p1.tick_params(labelcolor='white')
     lns = [l1, l2]
-    axes2.legend(handles=lns, loc='best')
+    axes2.legend(handles=lns, loc='upper right', fontsize=7)
     axes2.grid(False)
     p1.grid(False)
 
-    plt.savefig("updated_simulation_"+mesh+"_"+uid+".%04d.png"%fileCount,
+    plt.savefig("updated_injury_"+uid+".%04d.png"%fileCount,
             bbox_inches='tight', dpi = 252)
     plt.close()
