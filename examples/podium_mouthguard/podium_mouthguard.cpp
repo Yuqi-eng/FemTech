@@ -315,8 +315,16 @@ int main(int argc, char **argv) {
                               // nodal forces.
 
     /** Step- 10 - Second Partial Update of Nodal Velocities */
+    // for (int i = 0; i < nDOF; i++) {
+    //   velocities[i] = velocities_half[i] + dtby2 * accelerations[i];
+    // }
+    
     for (int i = 0; i < nDOF; i++) {
-      velocities[i] = velocities_half[i] + dtby2 * accelerations[i];
+      if (!boundary[i]) {
+        velocities[i] = velocities_half[i] + dtby2 * accelerations[i];
+      } else {
+        velocities[i] = velocities_half[i];
+        }
     }
 
     /** Step - 11 Checking* Energy Balance */
@@ -824,36 +832,36 @@ double InitBoundaryCondition(const Json::Value &jsonInput) {
       jsonToArray(linAccZt, jsonInput["linear-acceleration"]["zt"]);
       jsonToArray(linAccZv, jsonInput["linear-acceleration"]["zv"]);
 
-      // if (!jsonInput["angular-velocity"].empty()) {
-      //   angVelXSize = jsonInput["angular-velocity"]["xt"].size();
-      //   tempSize = jsonInput["angular-velocity"]["xv"].size();
-      //   assert(tempSize == angVelXSize);
-      //   angVelXt = (double *)malloc(sizeof(double) * angVelXSize);
-      //   angVelXv = (double *)malloc(sizeof(double) * angVelXSize);
-      //   angVelYSize = jsonInput["angular-velocity"]["yt"].size();
-      //   tempSize = jsonInput["angular-velocity"]["yv"].size();
-      //   assert(tempSize == angVelYSize);
-      //   angVelYt = (double *)malloc(sizeof(double) * angVelYSize);
-      //   angVelYv = (double *)malloc(sizeof(double) * angVelYSize);
-      //   angVelZSize = jsonInput["angular-velocity"]["zt"].size();
-      //   tempSize = jsonInput["angular-velocity"]["zv"].size();
-      //   assert(tempSize == angVelZSize);
-      //   angVelZt = (double *)malloc(sizeof(double) * angVelZSize);
-      //   angVelZv = (double *)malloc(sizeof(double) * angVelZSize);
-      //   jsonToArray(angVelXt, jsonInput["angular-velocity"]["xt"]);
-      //   jsonToArray(angVelXv, jsonInput["angular-velocity"]["xv"]);
-      //   jsonToArray(angVelYt, jsonInput["angular-velocity"]["yt"]);
-      //   jsonToArray(angVelYv, jsonInput["angular-velocity"]["yv"]);
-      //   jsonToArray(angVelZt, jsonInput["angular-velocity"]["zt"]);
-      //   jsonToArray(angVelZv, jsonInput["angular-velocity"]["zv"]);
-      //   angularVelPrescribed = true;
-      // } else {
-      //   if (jsonInput["angular-acceleration"].empty()) {
-      //     // If both angular acceleration or angular velocity is not prescribed 
-      //     // terminate the application
-      //     FILE_LOG_SINGLE(ERROR, "Either angular acceleration or angular velocity has to be prescribed");
-      //     TerminateFemTech(12);
-      //   }
+      if (!jsonInput["angular-velocity"].empty()) {
+        angVelXSize = jsonInput["angular-velocity"]["xt"].size();
+        tempSize = jsonInput["angular-velocity"]["xv"].size();
+        assert(tempSize == angVelXSize);
+        angVelXt = (double *)malloc(sizeof(double) * angVelXSize);
+        angVelXv = (double *)malloc(sizeof(double) * angVelXSize);
+        angVelYSize = jsonInput["angular-velocity"]["yt"].size();
+        tempSize = jsonInput["angular-velocity"]["yv"].size();
+        assert(tempSize == angVelYSize);
+        angVelYt = (double *)malloc(sizeof(double) * angVelYSize);
+        angVelYv = (double *)malloc(sizeof(double) * angVelYSize);
+        angVelZSize = jsonInput["angular-velocity"]["zt"].size();
+        tempSize = jsonInput["angular-velocity"]["zv"].size();
+        assert(tempSize == angVelZSize);
+        angVelZt = (double *)malloc(sizeof(double) * angVelZSize);
+        angVelZv = (double *)malloc(sizeof(double) * angVelZSize);
+        jsonToArray(angVelXt, jsonInput["angular-velocity"]["xt"]);
+        jsonToArray(angVelXv, jsonInput["angular-velocity"]["xv"]);
+        jsonToArray(angVelYt, jsonInput["angular-velocity"]["yt"]);
+        jsonToArray(angVelYv, jsonInput["angular-velocity"]["yv"]);
+        jsonToArray(angVelZt, jsonInput["angular-velocity"]["zt"]);
+        jsonToArray(angVelZv, jsonInput["angular-velocity"]["zv"]);
+        angularVelPrescribed = true;
+      } else {
+        if (jsonInput["angular-acceleration"].empty()) {
+          // If both angular acceleration or angular velocity is not prescribed 
+          // terminate the application
+          FILE_LOG_SINGLE(ERROR, "Either angular acceleration or angular velocity has to be prescribed");
+          TerminateFemTech(12);
+        }
         angAccXSize = jsonInput["angular-acceleration"]["xt"].size();
         tempSize = jsonInput["angular-acceleration"]["xv"].size();
         assert(tempSize == angAccXSize);
@@ -875,7 +883,7 @@ double InitBoundaryCondition(const Json::Value &jsonInput) {
         jsonToArray(angAccYv, jsonInput["angular-acceleration"]["yv"]);
         jsonToArray(angAccZt, jsonInput["angular-acceleration"]["zt"]);
         jsonToArray(angAccZv, jsonInput["angular-acceleration"]["zv"]);
-      // }
+      }
     }
 
     // Convert linear accelerations from g force to m/s^2
@@ -903,18 +911,18 @@ double InitBoundaryCondition(const Json::Value &jsonInput) {
         angVelZt[i] = 0.001 * angVelZt[i];
       }
       // Subtract the initial angular velocity from data
-      const double xZero = angVelXv[0];
-      for (int i = 0; i < angVelXSize; ++i) {
-        angVelXv[i] -= xZero;
-      }
-      const double yZero = angVelYv[0];
-      for (int i = 0; i < angVelYSize; ++i) {
-        angVelYv[i] -= yZero;
-      }
-      const double zZero = angVelZv[0];
-      for (int i = 0; i < angVelZSize; ++i) {
-        angVelZv[i] -= zZero;
-      }
+      // const double xZero = angVelXv[0];
+      // for (int i = 0; i < angVelXSize; ++i) {
+      //   angVelXv[i] -= xZero;
+      // }
+      // const double yZero = angVelYv[0];
+      // for (int i = 0; i < angVelYSize; ++i) {
+      //   angVelYv[i] -= yZero;
+      // }
+      // const double zZero = angVelZv[0];
+      // for (int i = 0; i < angVelZSize; ++i) {
+      //   angVelZv[i] -= zZero;
+      // }
     } else {
       for (int i = 0; i < angAccXSize; ++i) {
         angAccXt[i] = 0.001 * angAccXt[i];
@@ -1263,12 +1271,40 @@ double InitBoundaryCondition(const Json::Value &jsonInput) {
   // }
 
   // Set initial displacements, accelerations, velocities to zero
-  for (int i = 0; i < boundarySize; i++) {
-    int index = boundaryID[i] * ndim;
+  // for (int i = 0; i < boundarySize; i++) {
+  //   int index = boundaryID[i] * ndim;
+  //   for (int j = 0; j < ndim; ++j) {
+  //     displacements[index + j] = 0.0;
+  //     velocities[index + j] = 0.0;
+  //     accelerations[index + j] = 0.0;
+  //   }
+  // }
+  
+  // Initial angular velocity from prescribed PAV (rad/s), if available 
+  double omega0[3] = {0.0, 0.0, 0.0};
+
+  if (angularVelPrescribed){
+    omega0[0] = interpolateLinear(angVelXSize, angVelXt, angVelXv, startTime);
+    omega0[1] = interpolateLinear(angVelYSize, angVelYt, angVelYv, startTime);
+    omega0[2] = interpolateLinear(angVelZSize, angVelZt, angVelZv, startTime);
+  } else {
+    omega0[0] = yInt[0];
+    omega0[1] = yInt[1];
+    omega0[2] = yInt[2];
+  } 
+
+  // Initialise all mesh nodes with rigid-body rotation
+  for (int i = 0; i < nNodes; ++i) {
+    int index = i * ndim;
+    double vRot[3];
+
+    crossProduct(omega0, &coordinates[index], vRot);
+
     for (int j = 0; j < ndim; ++j) {
-      displacements[index + j] = 0.0;
-      velocities[index + j] = 0.0;
-      accelerations[index + j] = 0.0;
+        displacements[index + j] = 0.0;
+        velocities[index + j] = vRot[j];
+        velocities_half[index + j] = vRot[j];
+        accelerations[index + j] = 0.0;
     }
   }
   return startTime;
@@ -1407,7 +1443,7 @@ void computeDerivatives(const state_type &y, state_type &ydot, const double t) {
       // Compute 0.5 omegaxr + omega*(0.5||r|| cot(||r||) + (1-||r||cot(||r||))
       // *(r.omega)*r/(2*||r||*||r||)
       rdot[i] =
-          0.5 * (rdot[i] + rCotR * y[i] + (1.0 - rCotR) * rDotOmega * r[i]);
+          0.5 * (rdot[i] + rCotR * omega[i] + (1.0 - rCotR) * rDotOmega * r[i]);
     }
   }
 }
