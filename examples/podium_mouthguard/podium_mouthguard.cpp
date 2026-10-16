@@ -1246,21 +1246,21 @@ double InitBoundaryCondition(const Json::Value &jsonInput) {
   }
 
   // Optional initial angular velocity (rad/s)
-  if (jsonInput["initial-angular-velocity"].isArray()) {
-    if (jsonInput["initial-angular-velocity"].size() != 3) {
-      FILE_LOG_MASTER(ERROR,
-          "initial-angular-velocity must contain exactly 3 values");
-      TerminateFemTech(12);
-    }
-
-    for (int i = 0; i < 3; ++i) {
-        yInt[i] = jsonInput["initial-angular-velocity"][i].asDouble();
-    }
-
-    FILE_LOG_MASTER(INFO,
-        "Initial angular velocity (rad/s): %f %f %f",
-        yInt[0], yInt[1], yInt[2]);
-  }
+  // if (jsonInput["initial-angular-velocity"].isArray()) {
+  //   if (jsonInput["initial-angular-velocity"].size() != 3) {
+  //     FILE_LOG_MASTER(ERROR,
+  //         "initial-angular-velocity must contain exactly 3 values");
+  //     TerminateFemTech(12);
+  //   }
+  //
+  //   for (int i = 0; i < 3; ++i) {
+  //       yInt[i] = jsonInput["initial-angular-velocity"][i].asDouble();
+  //   }
+  //
+  //   FILE_LOG_MASTER(INFO,
+  //       "Initial angular velocity (rad/s): %f %f %f",
+  //       yInt[0], yInt[1], yInt[2]);
+  // }
 
   // Set initial displacements, accelerations, velocities to zero
   for (int i = 0; i < boundarySize; i++) {
